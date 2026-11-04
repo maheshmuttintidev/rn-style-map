@@ -1,0 +1,44 @@
+# The README "Use it as a PR check" workflow, run verbatim against a fixture
+# so the snippet is proven on every PR. It uses the published package from npm.
+# Runs inside fixtures/themed because at this repo's root `npx @shayrn/rn-style-map`
+# resolves to the (unbuilt) local package itself; user repos are not affected.
+name: PR check example
+on: pull_request
+permissions:
+  contents: read
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fixtures/themed
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Audit (fails on errors; add --strict to fail on warnings)
+        run: npx -y @shayrn/rn-style-map --audit
+      - name: UI diff vs base branch
+        if: ${{ !cancelled() }}
+        run: |
+          npx -y @shayrn/rn-style-map --diff origin/${{ github.base_ref }} --budget 1500 -o ui-diff.txt
+          {
+            echo '### UI changes vs `${{ github.base_ref }}`'
+            echo '```'
+            if [ -s ui-diff.txt ]; then cat ui-diff.txt; else echo 'No UI changes.'; fi
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: ui-diff
+          path: fixtures/themed/ui-diff.txt
+      - name: Self-test - the gate really fails (--strict on a fixture with warnings)
+        run: |
+          set +e
+          npx -y @shayrn/rn-style-map --audit --strict > /dev/null
+          code=$?
+          test "$code" = 1 || { echo "expected exit 1, got $code"; exit 1; }
