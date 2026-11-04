@@ -79,16 +79,16 @@
     "tailwindcss": "^3.4.19"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.5",
+    "@eslint/js": "^10.0.1",
     "@types/culori": "^4.0.1",
-    "@types/node": "^20.19.43",
+    "@types/node": "^26.6.6",
     "ajv": "^8.20.0",
-    "eslint": "^9.39.5",
-    "globals": "^16.5.0",
+    "eslint": "^10.14.0",
+    "globals": "^17.13.0",
     "prettier": "^3.9.10",
-    "tsup": "^8.5.1",
-    "typescript": "~5.9",
+    "tsup": "^9.0.0",
+    "typescript": "~7.0",
     "typescript-eslint": "^8.72.1",
-    "vitest": "^3.2.7"
+    "vitest": "^5.0.5"
   }
 }
