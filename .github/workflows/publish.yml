@@ -5,11 +5,11 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: 'Version bump'
+        description: 'Version bump (none = publish package.json version as-is)'
         required: true
         default: 'patch'
         type: choice
-        options: [patch, minor, major]
+        options: [none, patch, minor, major]
 
 permissions:
   contents: write
@@ -51,7 +51,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          npm version ${{ inputs.bump }} -m "chore: release v%s [skip ci]"
+          if [ "${{ inputs.bump }}" = "none" ]; then
+            git tag "v$(node -p "require('./package.json').version")"
+          else
+            npm version ${{ inputs.bump }} -m "chore: release v%s [skip ci]"
+          fi
           echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
       - name: Publish to npm
