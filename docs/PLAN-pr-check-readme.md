@@ -14,3 +14,4 @@ Source: a Reddit suggestion to lead with `--diff` against a git ref plus `--audi
 - `--diff <ref>`: never fails the build (exit 0; 2 on unknown ref). Uses `git rev-parse` + `git diff --name-only` + `git archive`, so full history (`fetch-depth: 0`) is needed and `origin/<base>` works. **Prints nothing when no screen changed**, so the summary step prints "No UI changes." for an empty file.
 - `-o` writes the file even when output is empty, so the artifact upload always has a file.
 - Diff/upload steps use `if: ${{ !cancelled() }}` so the diff still shows when the audit fails.
+- In CI on this repo, the example workflow runs from `fixtures/themed`: at the repo root `npx @shayrn/rn-style-map` resolves to the unbuilt local package (`rn-style-map: not found`, caught by the first CI run). Not an issue in user repos.
