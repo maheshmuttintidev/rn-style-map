@@ -1,0 +1,30 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20', '22', '24']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
+      - run: npm test
+      - name: Metrics gate (fixtures ≥ 90% resolved, every route ≤ 1500 o200k tokens)
+        run: node scripts/metrics.mjs --gate --min 90 --max-tokens 1500 fixtures/expo-nativewind fixtures/bare-stylesheet fixtures/themed
+      - name: Pack dry-run
+        run: npm pack --dry-run
+      - run: npm audit --omit=dev --audit-level=high

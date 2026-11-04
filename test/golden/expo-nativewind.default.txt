@@ -1,0 +1,46 @@
+# /  app/(tabs)/index.tsx  android·light·360x800  resolved 53/53 (100%)  ~323 tok
+layout app/_layout.tsx › app/(tabs)/_layout.tsx
+fonts F1=Montserrat-Bold
+ScrollView bg#FFF cc.px14 flex1 cc.pb42 cc.pt14  index.tsx:13
+  Text "Home" F1 21/28 #0B0B0F mb14  index.tsx:14
+  View×3 p14 bg#FFF mb10.5 r14  Card:6 ← :16
+    Text "Alpha" F1 15.75/24.5 #0B0B0F  components/Card.tsx:7
+    Text "Item 1" 12.25/17.5 #71717A mt3.5  index.tsx:17
+  View row mt21 gap10.5  index.tsx:20
+    Pressable px14 center bg#7C3AED h42 r10.5 a11y:button"New"  Button:8 ← :21
+      Text "New" F1 14/21 #FFF  components/Button.tsx:14
+    Pressable px14 bd1#7C3AED center bg#0000 h42 r10.5 a11y:button"Filter"  Button:8 ← :22
+      Text "Filter" F1 14/21 #7C3AED  components/Button.tsx:14
+
+# /item/[id]  app/item/[id].tsx  android·light·360x800  resolved 28/28 (100%)  ~205 tok
+layout app/_layout.tsx
+View bg#FFF flex1  [id].tsx:7
+  Image h196 w100%  [id].tsx:8
+  View p17.5  [id].tsx:9
+    Text "Item {id}" Montserrat-Bold 21/28 #0B0B0F  [id].tsx:10
+    Text "A sample detail page with a hero image." 14/21 #52525B mt7  [id].tsx:11
+    View py3.5 px10.5 bg#7C3AED1A mt14 alignSelf:flex-start r9999  [id].tsx:12
+      Text "NEW" w600 10.5/14 #7C3AED  [id].tsx:13
+
+# /login  app/(auth)/login.tsx  android·light·360x800  resolved 53/53 (100%)  ~309 tok
+layout app/_layout.tsx
+View p21 bg#FFF flex1  login.tsx:7
+  View mt42 gap14  login.tsx:8
+    Text "Welcome back" Montserrat-Bold ~25/~30 #0B0B0F  login.tsx:9
+    Text "Sign in to continue" Montserrat-Regular 15 #71717A  login.tsx:12
+  TextInput "Email" px14 bd1#E4E4E7 14/21 mt21 h42 r10.5 ph#A1A1AA  login.tsx:14
+  TextInput "Password" px14 bd1#E4E4E7 14/21 mt10.5 h42 r10.5  login.tsx:15
+  View ~mt21  login.tsx:16
+    Pressable px14 center bg#7C3AED h42 r10.5 a11y:button"Sign in"  Button:8 ← :17
+      Text "Sign in" Montserrat-Bold 14/21 #FFF  components/Button.tsx:14
+  Pressable p7 mt14 a11y:—  login.tsx:19
+    Text "Forgot password?" 13 #52525B  login.tsx:20
+
+# /settings  app/(tabs)/settings.tsx  android·light·360x800  resolved 24/24 (100%)  ~195 tok
+layout app/_layout.tsx › app/(tabs)/_layout.tsx
+View px14 bg#FFF flex1 pt28  settings.tsx:5
+  Text "Settings" Montserrat-Bold 17.5/24.5 #0B0B0F mb21  settings.tsx:6
+  View py10.5 ai-center jc-between row bdb1 bdc#E4E4E7  settings.tsx:7
+    Text "Dark mode" 14/21 #0B0B0F  settings.tsx:8
+    Switch  settings.tsx:9
+  Text "v1.0.0" 10.5/14 #A1A1AA mt28 noFontScale  settings.tsx:11

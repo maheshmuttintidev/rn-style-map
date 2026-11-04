@@ -1,0 +1,5 @@
+{
+  // expo base config is not installed in fixtures; own paths still apply
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": { "strict": true, "paths": { "@/*": ["./*"] } }
+}

@@ -1,0 +1,94 @@
+{
+  "name": "@shayrn/rn-style-map",
+  "version": "0.4.0",
+  "description": "Offline CLI that prints each React Native screen as a compact component tree with resolved styles and file:line, for AI agents and CI. No LLM, no device.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./schema/v1.json": "./schema/v1.json",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "rn-style-map": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "schema",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20.19"
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "expo-router",
+    "nativewind",
+    "styles",
+    "ai",
+    "agents",
+    "llm",
+    "cli",
+    "accessibility",
+    "audit",
+    "design-tokens"
+  ],
+  "author": "Mahesh Muttinti <maheshmuttintidev@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maheshmuttintidev/rn-style-map.git"
+  },
+  "homepage": "https://github.com/maheshmuttintidev/rn-style-map#readme",
+  "bugs": {
+    "url": "https://github.com/maheshmuttintidev/rn-style-map/issues"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src test",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "metrics": "node scripts/metrics.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.29.12",
+    "@babel/types": "^7.29.11",
+    "commander": "^14.0.3",
+    "culori": "^4.0.2",
+    "fast-glob": "^3.3.3",
+    "get-tsconfig": "^4.14.3",
+    "gpt-tokenizer": "^3.4.0",
+    "postcss": "^8.5.32",
+    "tailwindcss": "^3.4.19"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/culori": "^4.0.1",
+    "@types/node": "^20.19.43",
+    "ajv": "^8.20.0",
+    "eslint": "^9.39.5",
+    "globals": "^16.5.0",
+    "prettier": "^3.9.10",
+    "tsup": "^8.5.1",
+    "typescript": "~5.9",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^3.2.7"
+  }
+}

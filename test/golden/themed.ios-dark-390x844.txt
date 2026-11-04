@@ -1,0 +1,22 @@
+# /  src/app/index.tsx  ios·dark·390x844  resolved 25/25 (100%)  ~165 tok
+layout src/app/_layout.tsx
+View ~p23 bg#151718 flex1 ~gap12  index.tsx:9
+  Text "Welcome" Inter-700 32/32 #ECEDEE  ThemedText:7 ← :10
+  Text "Edit src/app/index.tsx to start." Inter 16/24 #9BA1A6  ThemedText:7 ← :11
+  Pressable center bg#FFF ~h46 r24 mt12 a11y:button"Get started"  index.tsx:12
+    Text "Get started" w600 16 #151718  index.tsx:13
+
+# /profile  src/app/profile.tsx  ios·dark·390x844  resolved 22/22 (100%)  ~128 tok
+layout src/app/_layout.tsx
+View p20 bg#0B0B0B flex1  profile.tsx:9
+  View p16 bd1#2A2E31 r16  profile.tsx:10
+    Text "Profile" Inter-700 32/32 #ECEDEE  ThemedText:7 ← :11
+    Text "Signed in" Inter 16/24 #ECEDEE  ThemedText:7 ← :12
+
+# /settings  src/app/settings.tsx  ios·dark·390x844  resolved 18/18 (100%)  ~145 tok
+layout src/app/_layout.tsx
+View px16 bg#1C1B1F flex1 pt24  settings.tsx:18
+  Text "Settings" w700 22 #E6E1E5 mb16  settings.tsx:19
+  View×3 py12 bdb1 bdbc#49454F  settings.tsx:21
+    Text "Account" 16 #FFF  settings.tsx:22
+  Text "Sign out" 14 #D0BCFF mt24  settings.tsx:25

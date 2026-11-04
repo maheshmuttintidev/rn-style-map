@@ -1,0 +1,3 @@
+{ "name": "fixture-expo-nativewind", "private": true, "main": "expo-router/entry",
+  "dependencies": { "expo": "54.0.0", "expo-router": "6.0.0", "nativewind": "4.2.1", "react": "19.1.0", "react-native": "0.81.0", "@shayrn/react-native-scaler": "1.2.0", "clsx": "2.1.1" },
+  "devDependencies": { "tailwindcss": "3.4.17" } }

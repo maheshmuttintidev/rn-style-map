@@ -1,0 +1,22 @@
+# /  src/app/index.tsx  android·light·360x800  resolved 25/25 (100%)  ~165 tok
+layout src/app/_layout.tsx
+View ~p21 bg#FFF flex1 ~gap11  index.tsx:9
+  Text "Welcome" Inter-700 32/32 #11181C  ThemedText:7 ← :10
+  Text "Edit src/app/index.tsx to start." Inter 16/24 #687076  ThemedText:7 ← :11
+  Pressable center bg#0A7EA4 ~h43 r24 mt12 a11y:button"Get started"  index.tsx:12
+    Text "Get started" w600 16 #FFF  index.tsx:13
+
+# /profile  src/app/profile.tsx  android·light·360x800  resolved 22/22 (100%)  ~127 tok
+layout src/app/_layout.tsx
+View p20 bg#FAFAFA flex1  profile.tsx:9
+  View p16 bd1#E6E8EB r16  profile.tsx:10
+    Text "Profile" Inter-700 32/32 #11181C  ThemedText:7 ← :11
+    Text "Signed in" Inter 16/24 #11181C  ThemedText:7 ← :12
+
+# /settings  src/app/settings.tsx  android·light·360x800  resolved 18/18 (100%)  ~146 tok
+layout src/app/_layout.tsx
+View px16 bg#FFF flex1 pt24  settings.tsx:18
+  Text "Settings" w700 22 #1B1B1F mb16  settings.tsx:19
+  View×3 py12 bdb1 bdbc#CAC4D0  settings.tsx:21
+    Text "Account" 16 #1B1B1F  settings.tsx:22
+  Text "Sign out" 14 #6750A4 mt24  settings.tsx:25

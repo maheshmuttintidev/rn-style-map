@@ -1,0 +1,32 @@
+# /Home  src/screens/HomeScreen.tsx  ios·dark·390x844  resolved 40/40 (100%)  ~245 tok
+layout src/App.tsx
+View bg#F8FAFC flex1  HomeScreen.tsx:13
+  View px16 ai-center jc-between row pt56 pb8  HomeScreen.tsx:14
+    Text "Home" System 28 #0F172A  HomeScreen.tsx:15
+    Pressable center w32 h32 a11y:— hs8  IconButton:6 ← :16
+      Text "+" 18 #2563EB  src/components/IconButton.tsx:7
+  FlatList cc.p16  HomeScreen.tsx:18
+    View×2 p16 bg#FFF shadow(#000,0.08,r8,0/2) r12 mb8  Card.ios:6 ← :18
+      Text "First" w600 17 #0F172A  src/components/Card.ios.tsx:7
+      Text "Hello from the first card" 15/20 #64748B mt4  src/components/Card.ios.tsx:8
+
+# /Profile  src/screens/ProfileScreen.tsx  ios·dark·390x844  resolved 24/24 (100%)  ~171 tok
+layout src/App.tsx
+View ai-center bg#F8FAFC flex1 pt48  ProfileScreen.tsx:8
+  Image w72 h72 r36  ProfileScreen.tsx:9
+  Text "Ada Lovelace" w700 22 #0F172A mt16  ProfileScreen.tsx:10
+  Text "Joined 2024" 13 #64748B mt4  ProfileScreen.tsx:11
+  View py2 px8 bg#2563EB1A mt8 r999  ProfileScreen.tsx:12
+    Text "PRO" w700 11 #2563EB  ProfileScreen.tsx:13
+
+# /Settings  src/screens/SettingsScreen.tsx  ios·dark·390x844  resolved 38/38 (100%)  ~252 tok
+layout src/App.tsx
+View p16 bg#F8FAFC flex1  SettingsScreen.tsx:15
+  View py14 ai-center jc-between row ~bdb0.5 bdbc#E2E8F0  SettingsScreen.tsx:6 ← :16
+    Text "Notifications" System 16 #0F172A  SettingsScreen.tsx:7
+    Switch thumbColor#FFF  SettingsScreen.tsx:17
+  View py14 ai-center jc-between row ~bdb0.5 bdbc#E2E8F0  SettingsScreen.tsx:6 ← :19
+    Text "Language" System 16 #0F172A  SettingsScreen.tsx:7
+    Text "English" 15 #64748B  SettingsScreen.tsx:20
+  TouchableOpacity jc-center bg#2563EB mt24 h48 r12 a11y:button  SettingsScreen.tsx:22
+    Text "Sign out" System 16 #FFF ta:center  SettingsScreen.tsx:23
