@@ -5,6 +5,47 @@
 [![CI](https://github.com/maheshmuttintidev/rn-style-map/actions/workflows/ci.yml/badge.svg)](https://github.com/maheshmuttintidev/rn-style-map/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+## Use it as a PR check
+
+Copy this into `.github/workflows/ui.yml`. It fails the PR on audit errors (WCAG contrast, touch targets) and posts the UI changes vs the base branch to the job summary, plus an artifact:
+
+```yaml
+name: UI check
+on: pull_request
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0            # --diff needs the base branch history
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Audit (fails on errors; add --strict to fail on warnings)
+        run: npx -y @shayrn/rn-style-map --audit
+      - name: UI diff vs base branch
+        if: ${{ !cancelled() }}
+        run: |
+          npx -y @shayrn/rn-style-map --diff origin/${{ github.base_ref }} --budget 1500 -o ui-diff.txt
+          {
+            echo '### UI changes vs `${{ github.base_ref }}`'
+            echo '```'
+            if [ -s ui-diff.txt ]; then cat ui-diff.txt; else echo 'No UI changes.'; fi
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: ui-diff
+          path: ui-diff.txt
+```
+
+- `--audit` exits `1` on error findings, `0` otherwise; `--strict` also fails on warnings, `--exit-zero` never fails. `unknown` and `info` findings never fail.
+- `--diff <ref>` always exits `0` (or `2` for an unknown ref). It prints only changed routes/nodes, and nothing at all when no screen changed. It reads the ref with `git archive`, so it needs `fetch-depth: 0` and never touches the working tree.
+- In a monorepo, add `--root apps/mobile` to both commands.
+- This exact workflow runs on every PR to this repo against a fixture: [`.github/workflows/pr-check-example.yml`](.github/workflows/pr-check-example.yml).
+
 ```
 # /settings  src/app/settings.tsx  android·dark·360x800  resolved 18/18 (100%)  ~145 tok
 layout src/app/_layout.tsx
@@ -134,22 +175,7 @@ When a background is an image, a gradient or unresolved, the finding is `unknown
 
 ## CI usage
 
-```yaml
-# .github/workflows/ui.yml
-on: pull_request
-jobs:
-  ui:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - uses: actions/setup-node@v4
-        with: { node-version: 22 }
-      - run: npx @shayrn/rn-style-map --audit                       # fails on WCAG errors
-      - run: npx @shayrn/rn-style-map --diff origin/${{ github.base_ref }} --budget 1500 -o ui-diff.txt
-      - uses: actions/upload-artifact@v4
-        with: { name: ui-diff, path: ui-diff.txt }
-```
+See [Use it as a PR check](#use-it-as-a-pr-check) for a ready-to-copy GitHub Actions workflow.
 
 With an AI agent, put `npx @shayrn/rn-style-map --route <screen>` in your agent instructions and the agent can read layout, colours, spacing and `file:line` before it edits.
 

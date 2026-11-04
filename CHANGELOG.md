@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+- Docs: README now leads with a copy-paste "Use it as a PR check" GitHub Actions workflow (`--audit` gate + `--diff origin/<base>` in the job summary). No code changes.
+
 ## 0.4.0
 
 - `--diff <ref>`: only routes and nodes changed vs a git ref. It uses a temporary `git archive` checkout and never touches your working tree. Removed nodes are listed as `- …`.
