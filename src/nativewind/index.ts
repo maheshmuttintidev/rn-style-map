@@ -1,6 +1,6 @@
 import { ClassList } from '../resolve/evaluator.js';
 import { Cond, Unknown, isUnknown } from '../resolve/values.js';
-import type { RawEntry, Where } from '../resolve/normalize.js';
+import { setRaw, type RawEntry, type Where } from '../resolve/normalize.js';
 import type { UnresolvedEntry } from '../types.js';
 import { splitVariants, utilityToStyle, variantApplies, type ClassContext } from './classes.js';
 
@@ -38,6 +38,6 @@ function applyClass(cls: string, ctx: ClassContext, where: Where, out: Map<strin
     if (a !== true) return; // false: not active; null: state variant, recorded but not applied
   }
   const r = utilityToStyle(util, ctx);
-  if ('style' in r) for (const [k, val] of Object.entries(r.style)) out.set(k, { value: val, source: 'nativewind' });
+  if ('style' in r) for (const [k, val] of Object.entries(r.style)) setRaw(out, k, val, 'nativewind', where, cls);
   else if ('unknown' in r) unres.push({ file: where.file, line: where.line, prop: where.prop, expr: cls, reason: 'UNKNOWN_CLASS' });
 }

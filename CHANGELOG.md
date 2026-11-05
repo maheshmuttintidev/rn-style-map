@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0
+
+- Opt-in `--explain` / `--why` (and `run({ explain: true })`): for each overridden style prop, print the layer stack and which source won (`↳ p=8 ← inline … over stylesheet …`). Works in compact, md, and json (json adds optional `layers` on style entries).
+- Traces StyleSheet refs, style arrays, inline styles, conditionals, `Platform.select`, and NativeWind classes when feasible; untraceable values are labelled, never guessed.
+- Without `--explain`, compact/md/json output is unchanged (goldens byte-identical). `--diff` signatures ignore explain text. `--budget` drops explain lines first when both flags are on.
+
 ## 0.4.2
 
 - Docs: `Dimensions.get` / `useWindowDimensions` resolve from `--viewport` (not listed under `RUNTIME_VALUE`). Added a short FAQ on runtime/dynamic styles. CLI `--version` now tracks `package.json`.

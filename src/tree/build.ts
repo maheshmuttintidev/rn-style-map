@@ -1,7 +1,7 @@
 import type * as t from '@babel/types';
 import { Engine, Repeat, ClassList, OPEN } from '../resolve/evaluator.js';
 import { Approx, Builtin, Closure, Cond, ContextRef, External, JsxValue, Scope, Unknown, isUnknown } from '../resolve/values.js';
-import { collectStyle, expandShorthands, finalizeStyle, type RawEntry } from '../resolve/normalize.js';
+import { collectStyle, expandShorthands, finalizeStyle, setRaw, type RawEntry } from '../resolve/normalize.js';
 import { collectClasses, type ClassContext } from '../nativewind/index.js';
 import type { MapNode, StyleEntry, UnresolvedEntry, Loc } from '../types.js';
 
@@ -27,7 +27,8 @@ export class TreeBuilder {
 
   constructor(
     private engine: Engine,
-    private nw: ClassContext | null
+    private nw: ClassContext | null,
+    private explain = false,
   ) {}
 
   /** Render a route file's default export (or first exported component). */
@@ -139,7 +140,7 @@ export class TreeBuilder {
       }
       if (styleProp in props) collectStyle(props[styleProp], where(styleProp), m, unres);
       expandShorthands(m);
-      Object.assign(style, finalizeStyle(m, where(styleProp), unres, prefix));
+      Object.assign(style, finalizeStyle(m, where(styleProp), unres, prefix, this.explain));
     }
     // colour/size props on icons, inputs, indicators
     const pm = new Map<string, RawEntry>();
@@ -148,9 +149,16 @@ export class TreeBuilder {
       const v = props[k];
       if (k === 'size' && typeof v === 'string' && !/^\d/.test(v)) continue;
       if (v && typeof v === 'object' && !(v instanceof Approx) && !isUnknown(v) && !(v instanceof Cond)) continue;
-      pm.set(k === 'color' && 'color' in style ? 'color' : k, { value: v, source: 'prop' });
+      const key = k === 'color' && 'color' in style ? 'color' : k;
+      if (this.explain && style[key]?.layers?.length) {
+        pm.set(key, { value: v, source: 'prop', layers: [...style[key].layers!, { source: 'prop', value: v, loc: { file: loc.file, line: loc.line } }] });
+      } else if (this.explain && style[key]) {
+        pm.set(key, { value: v, source: 'prop', layers: [{ source: style[key].source, value: style[key].value }, { source: 'prop', value: v, loc: { file: loc.file, line: loc.line } }] });
+      } else {
+        setRaw(pm, key, v, 'prop', where('props'));
+      }
     }
-    Object.assign(style, finalizeStyle(pm, where('props'), unres));
+    Object.assign(style, finalizeStyle(pm, where('props'), unres, '', this.explain));
     if (Object.keys(style).length) n.style = style;
     this.total += Object.keys(style).length + unres.length;
     this.resolved += Object.keys(style).length;

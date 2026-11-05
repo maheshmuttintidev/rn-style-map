@@ -1,11 +1,13 @@
 import { STYLESHEET, SPREADS, Repeat, ClassList } from './evaluator.js';
 import { Approx, Cond, Unknown, isUnknown, Closure, JsxValue, External, Builtin } from './values.js';
 import { normalizeColor } from './color.js';
-import type { StyleEntry, StyleSource, UnresolvedEntry, Reason } from '../types.js';
+import type { StyleEntry, StyleLayer, StyleSource, UnresolvedEntry, Reason } from '../types.js';
 
 export interface RawEntry {
   value: unknown;
   source: StyleSource;
+  /** Oldest → newest (winner last). Always tracked during merge; copied to StyleEntry only with --explain. */
+  layers?: StyleLayer[];
 }
 
 export interface Where {
@@ -16,6 +18,23 @@ export interface Where {
 
 function toUnresolved(u: Unknown, where: Where, reason?: Reason): UnresolvedEntry {
   return { file: u.file ?? where.file, line: u.line ?? where.line, prop: where.prop, expr: u.expr, reason: reason ?? u.reason };
+}
+
+function layerOf(source: StyleSource, value: unknown, where?: Where, via?: string): StyleLayer {
+  const L: StyleLayer = { source, value };
+  if (where) L.loc = { file: where.file, line: where.line };
+  if (via) L.via = via;
+  return L;
+}
+
+/** Set/override a raw style key, appending to the layer stack. */
+export function setRaw(out: Map<string, RawEntry>, key: string, value: unknown, source: StyleSource, where?: Where, via?: string): void {
+  const layer = layerOf(source, value, where, via);
+  const prev = out.get(key);
+  const layers = prev
+    ? [...(prev.layers?.length ? prev.layers : [layerOf(prev.source, prev.value)]), layer]
+    : [layer];
+  out.set(key, { value, source, layers });
 }
 
 /** Flatten a style prop value (RN semantics: arrays flatten, later wins, falsy ignored). */
@@ -42,7 +61,8 @@ export function collectStyle(v: unknown, where: Where, out: Map<string, RawEntry
       const prev = out.get(k);
       const opts = maps.map((m) => (m.has(k) ? m.get(k)!.value : prev?.value));
       const src = maps.find((m) => m.has(k))!.get(k)!.source;
-      out.set(k, { value: condOf(opts, v.expr), source: src });
+      // Cond: treat as one layer from the winning/known source; mark via as conditional
+      setRaw(out, k, condOf(opts, v.expr), src, where, 'conditional');
     }
     return;
   }
@@ -52,7 +72,7 @@ export function collectStyle(v: unknown, where: Where, out: Map<string, RawEntry
   }
   if (typeof v === 'object') {
     const source: StyleSource = forced ?? (STYLESHEET.has(v) ? 'stylesheet' : 'inline');
-    for (const [k, val] of Object.entries(v)) out.set(k, { value: val, source });
+    for (const [k, val] of Object.entries(v)) setRaw(out, k, val, source, where);
     const sp = (v as any)[SPREADS] as Unknown[] | undefined;
     if (sp) for (const u of sp) unres.push(toUnresolved(u, where, 'SPREAD'));
   }
@@ -87,8 +107,18 @@ export function expandShorthands(m: Map<string, RawEntry>): void {
     for (const s of SIDES) {
       const axis = s === 'Top' || s === 'Bottom' ? 'Vertical' : 'Horizontal';
       const logical = s === 'Left' ? 'Start' : s === 'Right' ? 'End' : undefined;
-      res[s] = get(base + s) ?? (logical ? get(base + logical) : undefined) ?? get(base + axis) ?? get(base);
+      // least → most specific for explain stack
+      const chain = [get(base), get(base + axis), logical ? get(base + logical) : undefined, get(base + s)].filter(Boolean) as RawEntry[];
+      if (!chain.length) continue;
+      const winner = chain[chain.length - 1];
+      const layers: StyleLayer[] = [];
+      for (const e of chain) {
+        if (e.layers?.length) layers.push(...e.layers);
+        else layers.push(layerOf(e.source, e.value));
+      }
+      res[s] = { value: winner.value, source: winner.source, layers };
     }
+    // Only delete shorthand keys; side keys keep Map insertion order when updated in place.
     for (const k of [base, base + 'Horizontal', base + 'Vertical', base + 'Start', base + 'End']) m.delete(k);
     for (const s of SIDES) if (res[s]) m.set(base + s, res[s]!);
   }
@@ -151,8 +181,23 @@ function leaf(key: string, v: unknown): Leaf {
   return { ok: false, u: new Unknown('RUNTIME_VALUE', String(v)), reason: 'RUNTIME_VALUE' };
 }
 
+function finalizeLayers(raw: RawEntry, key: string): StyleLayer[] | undefined {
+  if (!raw.layers?.length) return undefined;
+  const out: StyleLayer[] = [];
+  for (const L of raw.layers) {
+    const l = leaf(key, L.value);
+    if (!l.ok) {
+      // Keep an honest marker for untraceable layer values rather than inventing a number
+      out.push({ ...L, value: `{unresolved}` });
+      continue;
+    }
+    out.push({ ...L, value: l.value });
+  }
+  return out;
+}
+
 /** Turn merged raw entries into normalised StyleEntries; unresolvable values go to `unres`. */
-export function finalizeStyle(m: Map<string, RawEntry>, where: Where, unres: UnresolvedEntry[], prefix = ''): Record<string, StyleEntry> {
+export function finalizeStyle(m: Map<string, RawEntry>, where: Where, unres: UnresolvedEntry[], prefix = '', explain = false): Record<string, StyleEntry> {
   const out: Record<string, StyleEntry> = {};
   for (const [k, raw] of m) {
     const key = prefix + k;
@@ -167,6 +212,10 @@ export function finalizeStyle(m: Map<string, RawEntry>, where: Where, unres: Unr
       const vals = leaves.map((l) => (l as any).value);
       const e: StyleEntry = { value: vals[0], source: raw.source, alt: vals };
       if (leaves.some((l) => (l as any).approx)) e.approx = true;
+      if (explain) {
+        const layers = finalizeLayers(raw, k);
+        if (layers?.length) e.layers = layers;
+      }
       out[key] = e;
       continue;
     }
@@ -180,6 +229,10 @@ export function finalizeStyle(m: Map<string, RawEntry>, where: Where, unres: Unr
     if (l.approx) {
       e.approx = true;
       if (l.expr) e.expr = l.expr;
+    }
+    if (explain) {
+      const layers = finalizeLayers(raw, k);
+      if (layers?.length) e.layers = layers;
     }
     out[key] = e;
   }

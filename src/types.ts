@@ -20,6 +20,15 @@ export interface Loc {
   col?: number;
 }
 
+export interface StyleLayer {
+  source: StyleSource;
+  value: unknown;
+  /** File:line of the style/className prop (or best known site). */
+  loc?: Loc;
+  /** Extra label when known (e.g. NativeWind class `p-2`). */
+  via?: string;
+}
+
 export interface StyleEntry {
   value: unknown;
   source: StyleSource;
@@ -28,6 +37,8 @@ export interface StyleEntry {
   expr?: string;
   /** Alternatives when a condition could not be decided statically. */
   alt?: unknown[];
+  /** Override stack (oldest → newest/winner). Present only with --explain. */
+  layers?: StyleLayer[];
 }
 
 export interface UnresolvedEntry {
@@ -134,4 +145,6 @@ export interface Options {
   scheme: Scheme;
   viewport: { width: number; height: number };
   config?: UserConfig;
+  /** Opt-in: record and show which style layer won for each prop. */
+  explain?: boolean;
 }
