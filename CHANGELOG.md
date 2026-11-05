@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.2
+
+- Docs: `Dimensions.get` / `useWindowDimensions` resolve from `--viewport` (not listed under `RUNTIME_VALUE`). Added a short FAQ on runtime/dynamic styles. CLI `--version` now tracks `package.json`.
+- Test: fixture covering `Dimensions.get` and `useWindowDimensions` at the chosen viewport.
+
 ## 0.4.1
 
 - Docs: README now leads with a copy-paste "Use it as a PR check" GitHub Actions workflow (`--audit` gate + `--diff origin/<base>` in the job summary). No code changes.
