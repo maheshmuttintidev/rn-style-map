@@ -134,7 +134,9 @@ Props use short keys followed by the value: `p` `px` `py` `pt`… padding, `m…
 
 ### Unresolved reason codes
 
-`RUNTIME_VALUE` (props, state, network, `Dimensions` at runtime) · `SPREAD` (spread of an unknown object) · `UNKNOWN_IMPORT` (file not found / package code) · `DYNAMIC_CLASS` (computed `className`) · `UNKNOWN_CLASS` (class not in your Tailwind theme) · `HOOK_UNSUPPORTED` · `CONDITIONAL_UNKNOWN` (branch could not be decided) · `EXTERNAL_COMPONENT` (third-party component internals).
+`RUNTIME_VALUE` (props, state, network, or measured layout the CLI cannot know) · `SPREAD` (spread of an unknown object) · `UNKNOWN_IMPORT` (file not found / package code) · `DYNAMIC_CLASS` (computed `className`) · `UNKNOWN_CLASS` (class not in your Tailwind theme) · `HOOK_UNSUPPORTED` · `CONDITIONAL_UNKNOWN` (branch could not be decided) · `EXTERNAL_COMPONENT` (third-party component internals).
+
+`Dimensions.get` / `useWindowDimensions` are **not** `RUNTIME_VALUE`: they resolve from `--viewport` (default `360x800`).
 
 ## Audit
 
@@ -205,6 +207,23 @@ The real-app run takes about 0.25 s for 13 routes. CI fails if any fixture drops
 - It reads code; it does not run it. Values from props, state, network or measured layout stay unresolved, and are reported.
 - Shadows and transforms are shown as given, not composited. `trackColor`-style object props on third-party components are not shown.
 - Tailwind `plugins` that add utilities at runtime are not executed; such classes report `UNKNOWN_CLASS`.
+
+### FAQ: runtime / dynamic styles
+
+Dynamic styles are never invented. The CLI either resolves them from flags you set, shows both sides of a decidable conditional (`a|b`), or marks them unresolved with a reason code.
+
+| What you wrote | What rn-style-map does |
+|---|---|
+| `Platform.select` / `Platform.OS` / `.ios.tsx` | Resolved for `--platform` |
+| NativeWind `dark:` / `ios:` / `android:` | Gated by `--scheme` / `--platform` |
+| `Dimensions.get('window')` / `useWindowDimensions()` | Resolved from `--viewport` (width/height; `fontScale` 1) |
+| Scaler helpers (`scale`, `wp`, …) | Approx at `--viewport` (shown with `~`) |
+| `cond ? a : b` when both sides are known | Shown as `a\|b` (or one side if the condition is decidable) |
+| Prop-/state-/network-chosen styles | `RUNTIME_VALUE` / unresolved — never guessed |
+| Dynamic `className` (`` `p-${x}` ``, variable) | `DYNAMIC_CLASS` |
+| Theme hooks the CLI does not know | `HOOK_UNSUPPORTED` |
+
+`--diff` is only as good as static resolution. Prefer `--unresolved` (and `--audit` as the CI gate) when a route has dynamics.
 
 ## License
 

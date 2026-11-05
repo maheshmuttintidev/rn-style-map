@@ -52,4 +52,19 @@ export default function X() { const s = useColorScheme(); return <View style={{ 
     expect((await screen(src)).output).toMatch(/bg#FFF\b/);
     expect((await screen(src, { scheme: 'dark' })).output).toMatch(/bg#000\b/);
   });
+
+  it('Dimensions.get and useWindowDimensions resolve from --viewport', async () => {
+    const src = `import { View, Dimensions, useWindowDimensions } from 'react-native';
+export default function X() {
+  const { width } = useWindowDimensions();
+  return <View style={{ padding: Dimensions.get('window').width * 0.05, width: width / 2 }} />;
+}`;
+    const def = await screen(src);
+    expect(def.output).toMatch(/\bp18\b/);
+    expect(def.output).toMatch(/\bw180\b/);
+    expect(def.result.routes[0].stats).toMatchObject({ resolved: 5, total: 5 });
+    const wide = await screen(src, { viewport: { width: 400, height: 800 } });
+    expect(wide.output).toMatch(/\bp20\b/);
+    expect(wide.output).toMatch(/\bw200\b/);
+  });
 });

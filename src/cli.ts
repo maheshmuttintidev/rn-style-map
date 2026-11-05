@@ -1,9 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Command, Option } from 'commander';
 import { run, type RunOptions } from './index.js';
 
-const pkgVersion = '0.4.0';
+const pkgVersion: string = JSON.parse(
+  fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'package.json'), 'utf8'),
+).version;
 
 function parseViewport(s: string): { width: number; height: number } {
   const m = /^(\d+)x(\d+)$/i.exec(s);
