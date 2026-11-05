@@ -1,6 +1,6 @@
 {
   "name": "@shayrn/rn-style-map",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Offline CLI that prints each React Native screen as a compact component tree with resolved styles and file:line, for AI agents and CI. No LLM, no device.",
   "type": "module",
   "main": "./dist/index.cjs",
