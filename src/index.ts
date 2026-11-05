@@ -54,7 +54,7 @@ export async function run(o: RunOptions): Promise<RunResult> {
   }
   routes.sort((x, y) => (x.path < y.path ? -1 : x.path > y.path ? 1 : 0));
   const result: MapResult = { version: 1, project: a.project, routes };
-  const ro: RenderOpts = { format: o.format, depth: o.depth, only: o.only, budget: o.budget, unresolved: o.unresolved };
+  const ro: RenderOpts = { format: o.format, depth: o.depth, only: o.only, budget: o.budget, unresolved: o.unresolved, explain: o.explain };
   const extra: { tokensTable?: string; tokensMd?: string; findings?: string } = {};
   if (o.tokens) {
     result.tokens = tokenTable(routes);

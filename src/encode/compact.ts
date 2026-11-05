@@ -11,6 +11,8 @@ export interface Trims {
   text?: number;
   /** font family aliases (F1=…) for families repeated ≥3 times */
   fonts?: Map<string, string>;
+  /** When false, suppress --explain lines (budget trim step). Default: show when encodeLines(explain=true). */
+  explain?: boolean;
 }
 
 export interface CompactOpts {
@@ -279,10 +281,49 @@ export function filterOnly(n: MapNode, names: string[]): MapNode | null {
   return { name: '…' + n.name, loc: n.loc, callsite: n.callsite, children: kids };
 }
 
-export function encodeLines(tree: MapNode, routeFile: string, trims: Trims, refs?: Map<string, string>): string[] {
+function fmtLayerValue(v: unknown): string {
+  if (typeof v === 'string') return /^#[0-9A-F]{6,8}$/i.test(v) ? shortHex(v) : v.includes(' ') ? JSON.stringify(v) : v;
+  if (typeof v === 'number') return String(Math.round(v * 100) / 100);
+  if (v === null || v === undefined) return '∅';
+  if (v === '{unresolved}') return '?';
+  return JSON.stringify(v).replace(/"/g, '');
+}
+
+function locLabel(loc: { file: string; line: number } | undefined, routeFile: string): string {
+  if (!loc) return '';
+  const f = loc.file === routeFile ? basename(loc.file) : loc.file;
+  return `${f}:${loc.line}`;
+}
+
+/** One explain line per overridden prop (2+ layers). Never mutates nodeLine / diff signatures. */
+export function explainLines(style: Record<string, StyleEntry> | undefined, routeFile: string): string[] {
+  if (!style) return [];
+  const out: string[] = [];
+  for (const [key, e] of Object.entries(style)) {
+    const layers = e.layers;
+    if (!layers || layers.length < 2) continue;
+    const abbr = ABBR[key] ?? key;
+    const parts = layers.map((L, i) => {
+      const won = i === layers.length - 1;
+      const via = L.via ? ` ${L.via}` : '';
+      const loc = locLabel(L.loc, routeFile);
+      const bit = `${L.source}${via} ${fmtLayerValue(L.value)}${loc ? ` (${loc})` : ''}`;
+      return won ? bit : bit;
+    });
+    const winner = parts[parts.length - 1];
+    const over = parts.slice(0, -1);
+    out.push(`↳ ${abbr}=${fmtLayerValue(e.value)} ← ${winner} over ${over.join(' → ')}`);
+  }
+  return out;
+}
+
+export function encodeLines(tree: MapNode, routeFile: string, trims: Trims, refs?: Map<string, string>, explain = false): string[] {
   const lines: string[] = [];
   const visit = (n: MapNode, d: number) => {
     lines.push('  '.repeat(d) + nodeLine(n, routeFile, trims, refs));
+    if (explain) {
+      for (const x of explainLines(n.style, routeFile)) lines.push('  '.repeat(d) + '  ' + x);
+    }
     for (const c of n.children ?? []) visit(c, d + 1);
   };
   visit(tree, 0);

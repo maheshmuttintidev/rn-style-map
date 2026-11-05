@@ -49,7 +49,7 @@ export function analyze(opts: Options, onlyFiles?: Set<string>): Analysis {
   }
   const selected = found.filter((r) => routeMatches(r, opts.route)).filter((r) => !onlyFiles || onlyFiles.has(project.rel(r.file)));
   if (opts.route?.length && !selected.length && !onlyFiles) throw new ConfigError(`No route matches ${opts.route.join(', ')}. Known: ${found.map((r) => r.path).join(', ')}`);
-  const builder = new TreeBuilder(engine, nw);
+  const builder = new TreeBuilder(engine, nw, !!opts.explain);
   const routes: RouteMap[] = [];
   for (const r of selected) {
     const b = builder.buildRoute(r.file, path.basename(r.file).replace(/\.\w+$/, ''), r.component);

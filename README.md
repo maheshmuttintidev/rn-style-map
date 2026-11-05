@@ -79,6 +79,7 @@ rn-style-map --route /login --route "/(tabs)/*"
 rn-style-map --platform ios --scheme dark --viewport 390x844
 rn-style-map --format md --budget 1500         # fit each route into 1.5k tokens
 rn-style-map --unresolved                      # list what could not be resolved, and why
+rn-style-map --explain                         # which style layer won (opt-in; default output unchanged)
 rn-style-map --tokens                          # colour / font / spacing / radius usage table
 rn-style-map --audit                           # WCAG 2.2 / HIG / Material checks; exit 1 on errors
 rn-style-map --diff origin/main                # only routes and nodes changed vs a git ref
@@ -95,12 +96,13 @@ rn-style-map --entry src/components/Card.tsx   # one component, no route discove
 | `--only <names>` | Keep only these component names (ancestors shown as `…Name`) | – |
 | `--tokens` | Print the token table (colours, fonts, font sizes, spacing, radii) with use counts | off |
 | `--format <fmt>` | `compact` \| `json` \| `md` | `compact` |
-| `--budget <n>` | Token cap per route (o200k, min 50). Trims in order: `×N` collapse, default-valued props, `$sN` style refs, line-only locations, depth, text. The footer says what was trimmed | none |
+| `--budget <n>` | Token cap per route (o200k, min 50). Trims in order: explain lines (when `--explain`), `×N` collapse, default-valued props, `$sN` style refs, line-only locations, depth, text. The footer says what was trimmed | none |
 | `--diff <ref>` | Only routes/nodes changed vs a git ref. Removed nodes are listed as `- …` | – |
 | `--platform <p>` | `android` \| `ios` | `android` |
 | `--scheme <s>` | `light` \| `dark` | `light` |
 | `--viewport <WxH>` | Window size in dp for scaler helpers and `%`/breakpoints | `360x800` |
 | `--unresolved` | Detailed unresolved list (`file:line prop=expr (REASON)`) | summary only |
+| `--explain` / `--why` | Show which style layer won for each overridden prop (`↳ p=8 ← inline … over stylesheet …`). Opt-in; default output unchanged | off |
 | `--audit` | Run the audit engine | off |
 | `--strict` | With `--audit`: warnings fail too | off |
 | `--exit-zero` | With `--audit`: report only, always exit 0 | off |
@@ -207,6 +209,18 @@ The real-app run takes about 0.25 s for 13 routes. CI fails if any fixture drops
 - It reads code; it does not run it. Values from props, state, network or measured layout stay unresolved, and are reported.
 - Shadows and transforms are shown as given, not composited. `trackColor`-style object props on third-party components are not shown.
 - Tailwind `plugins` that add utilities at runtime are not executed; such classes report `UNKNOWN_CLASS`.
+
+### Why didn't my style change?
+
+Use `--explain` (alias `--why`) when a prop looks wrong. It prints a `↳` line under the node for every overridden style prop — oldest layer first, winner last:
+
+```
+View p8 bg#FFF …  card.tsx:12
+  ↳ p=8 ← inline 8 (card.tsx:12) over stylesheet 16 (card.tsx:30)
+  ↳ bg=#FFF ← inline #FFF (card.tsx:12) over nativewind bg-zinc-100 #F4F4F5 (card.tsx:12)
+```
+
+Covers StyleSheet refs, style arrays, inline styles, `Platform.select`, conditionals, and NativeWind classes when they can be traced. Anything it cannot trace is labelled unresolved — never guessed. Without the flag, compact / md / json stay byte-identical to previous releases. `--diff` signatures ignore explain text. JSON adds an optional `layers` array on style entries only when `--explain` is on.
 
 ### FAQ: runtime / dynamic styles
 

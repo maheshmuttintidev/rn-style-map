@@ -36,6 +36,8 @@ export async function main(argv: string[]): Promise<number> {
     .addOption(new Option('--scheme <s>', 'colour scheme').choices(['light', 'dark']).default('light'))
     .option('--viewport <WxH>', 'window size in dp for scaler helpers', '360x800')
     .option('--unresolved', 'list unresolved props with reason codes')
+    .option('--explain', 'show which style layer won for each overridden prop')
+    .option('--why', 'alias for --explain')
     .option('--audit', 'run the audit engine; exit 1 on error findings')
     .option('--strict', 'with --audit: warnings also fail')
     .option('--exit-zero', 'with --audit: report only, always exit 0')
@@ -73,6 +75,7 @@ export async function main(argv: string[]): Promise<number> {
       format: o.format,
       budget,
       unresolved: Boolean(o.unresolved),
+      explain: Boolean(o.explain || o.why),
       tokens: Boolean(o.tokens),
       audit: Boolean(o.audit),
       diff: o.diff,

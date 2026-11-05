@@ -8,6 +8,8 @@ export interface RenderOpts {
   only?: string[];
   budget?: number;
   unresolved: boolean;
+  /** Opt-in override tracing (also strips layers from JSON when false). */
+  explain?: boolean;
 }
 
 export interface RenderedRoute {
@@ -23,7 +25,7 @@ function view(r: RouteMap, o: RenderOpts): MapNode {
   return limitDepth(t, o.depth);
 }
 
-function block(r: RouteMap, tree: MapNode, p: ProjectInfo, trims: Trims, detail: boolean, notes: string[]): { text: string; tokens: number } {
+function block(r: RouteMap, tree: MapNode, p: ProjectInfo, trims: Trims, detail: boolean, notes: string[], explain = false): { text: string; tokens: number } {
   let t = tree;
   if (trims.collapse) t = collapseSiblings(t, r.file);
   if (trims.depth) t = limitDepth(t, trims.depth);
@@ -35,7 +37,9 @@ function block(r: RouteMap, tree: MapNode, p: ProjectInfo, trims: Trims, detail:
   if (fonts.size) body.push('fonts ' + [...fonts].map(([k, v]) => `${v}=${k}`).join(' '));
   if (refs?.size) for (const [k, v] of refs) body.push(`${v} = ${k}`);
   if (r.diff) body.push(`diff ${r.diff.status} vs ${r.diff.ref}`);
-  body.push(...encodeLines(t, r.file, trims, refs));
+  // When both --budget and --explain: allow dropping explain lines first (trims.explain === false)
+  const showExplain = explain && trims.explain !== false;
+  body.push(...encodeLines(t, r.file, trims, refs, showExplain));
   if (r.diff) for (const x of r.diff.removed) body.push(`- ${x}`);
   const f = footer(r.unresolved, detail, r.file);
   if (f) body.push(f);
@@ -57,17 +61,20 @@ export function renderCompact(r: RouteMap, p: ProjectInfo, o: RenderOpts): Rende
   const tree = view(r, o);
   const trims: Trims = {};
   const notes: string[] = [];
-  let out = block(r, tree, p, trims, o.unresolved, notes);
+  const explain = !!o.explain;
+  let out = block(r, tree, p, trims, o.unresolved, notes, explain);
   if (!o.budget || out.tokens <= o.budget) return { route: r, text: out.text, tokens: out.tokens, trimmed: [] };
   const steps: Array<() => boolean> = [
+    // Drop explain lines first when both flags are on — keeps node lines / goldens / diff sigs intact
+    () => (explain ? ((trims.explain = false), notes.push('explain'), true) : false),
     () => ((trims.collapse = true), notes.push('×N'), true),
     () => ((trims.defaults = true), notes.push('defaults'), true),
     () => ((trims.refs = true), notes.push('$refs'), true),
     () => ((trims.shortLoc = true), notes.push('loc'), true),
   ];
   for (const s of steps) {
-    s();
-    out = block(r, tree, p, trims, o.unresolved, notes);
+    if (!s()) continue;
+    out = block(r, tree, p, trims, o.unresolved, notes, explain);
     if (out.tokens <= o.budget) return { route: r, text: out.text, tokens: out.tokens, trimmed: notes };
   }
   // reduce depth
@@ -75,23 +82,23 @@ export function renderCompact(r: RouteMap, p: ProjectInfo, o: RenderOpts): Rende
   for (let d = d0 - 1; d >= 1; d--) {
     trims.depth = d;
     const n = [...notes, `depth→${d}`];
-    out = block(r, tree, p, trims, o.unresolved, n);
+    out = block(r, tree, p, trims, o.unresolved, n, explain);
     if (out.tokens <= o.budget) return { route: r, text: out.text, tokens: out.tokens, trimmed: n };
   }
   // truncate text
   for (const len of [24, 12, 6]) {
     trims.text = len;
     const n = [...notes, `depth→${trims.depth ?? d0}`, `text→${len}`];
-    out = block(r, tree, p, trims, o.unresolved, n);
+    out = block(r, tree, p, trims, o.unresolved, n, explain);
     if (out.tokens <= o.budget) return { route: r, text: out.text, tokens: out.tokens, trimmed: n };
   }
   // last resort: summary-only footer is already on; drop footer detail
   const n = [...notes, `depth→${trims.depth ?? d0}`, `text→6`];
-  out = block(r, tree, p, trims, false, n);
+  out = block(r, tree, p, trims, false, n, explain);
   if (out.tokens <= o.budget) return { route: r, text: out.text, tokens: out.tokens, trimmed: n };
   // budget smaller than the tree root: header only (the header itself is never trimmed)
   const tiny = { ...r, layouts: [], unresolved: [] };
-  out = block(tiny, { name: tree.name, loc: tree.loc }, p, {}, false, ['body']);
+  out = block(tiny, { name: tree.name, loc: tree.loc }, p, {}, false, ['body'], false);
   const text = out.text.split('\n').filter((l) => !l.startsWith(tree.name)).join('\n');
   return { route: r, text, tokens: countTokens(text), trimmed: ['body'] };
 }
@@ -107,11 +114,21 @@ export function tokenTableMd(t: TokenTable): string {
   return lines.join('\n');
 }
 
-export function stripInternal(n: MapNode): MapNode {
+export function stripInternal(n: MapNode, keepLayers = false): MapNode {
   const { unresolved: _u, ...rest } = n;
   void _u;
   const out: MapNode = { ...rest };
-  if (n.children) out.children = n.children.map(stripInternal);
+  if (n.style && !keepLayers) {
+    const style: NonNullable<MapNode['style']> = {};
+    for (const [k, e] of Object.entries(n.style)) {
+      if (!e.layers) { style[k] = e; continue; }
+      const { layers: _l, ...se } = e;
+      void _l;
+      style[k] = se;
+    }
+    out.style = style;
+  }
+  if (n.children) out.children = n.children.map((c) => stripInternal(c, keepLayers));
   return out;
 }
 
@@ -119,7 +136,7 @@ export function renderAll(result: MapResult, rendered: RenderedRoute[], o: Rende
   if (o.format === 'json') {
     const routes = rendered.map((x) => ({
       ...x.route,
-      tree: stripInternal(view(x.route, o)),
+      tree: stripInternal(view(x.route, o), !!o.explain),
       stats: { ...x.route.stats, tokens: x.tokens },
       unresolved: x.route.unresolved,
     }));

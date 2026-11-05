@@ -3,114 +3,425 @@
   "$id": "https://github.com/maheshmuttintidev/rn-style-map/blob/main/schema/v1.json",
   "title": "rn-style-map output v1",
   "type": "object",
-  "required": ["version", "project", "routes"],
+  "required": [
+    "version",
+    "project",
+    "routes"
+  ],
   "additionalProperties": false,
   "properties": {
-    "version": { "const": 1 },
+    "version": {
+      "const": 1
+    },
     "project": {
       "type": "object",
-      "required": ["router", "platform", "scheme", "viewport", "styling"],
+      "required": [
+        "router",
+        "platform",
+        "scheme",
+        "viewport",
+        "styling"
+      ],
       "additionalProperties": false,
       "properties": {
-        "router": { "enum": ["expo-router", "react-navigation", "entry"] },
-        "platform": { "enum": ["android", "ios"] },
-        "scheme": { "enum": ["light", "dark"] },
-        "viewport": {
-          "type": "object", "required": ["width", "height"], "additionalProperties": false,
-          "properties": { "width": { "type": "number" }, "height": { "type": "number" } }
+        "router": {
+          "enum": [
+            "expo-router",
+            "react-navigation",
+            "entry"
+          ]
         },
-        "styling": { "type": "array", "items": { "$ref": "#/definitions/source" } }
+        "platform": {
+          "enum": [
+            "android",
+            "ios"
+          ]
+        },
+        "scheme": {
+          "enum": [
+            "light",
+            "dark"
+          ]
+        },
+        "viewport": {
+          "type": "object",
+          "required": [
+            "width",
+            "height"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            }
+          }
+        },
+        "styling": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/source"
+          }
+        }
       }
     },
-    "routes": { "type": "array", "items": { "$ref": "#/definitions/route" } },
+    "routes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/route"
+      }
+    },
     "tokens": {
       "type": "object",
-      "required": ["colors", "fonts", "fontSizes", "spacing", "radii"],
+      "required": [
+        "colors",
+        "fonts",
+        "fontSizes",
+        "spacing",
+        "radii"
+      ],
       "additionalProperties": false,
       "properties": {
-        "colors": { "$ref": "#/definitions/counts" },
-        "fonts": { "$ref": "#/definitions/counts" },
-        "fontSizes": { "$ref": "#/definitions/counts" },
-        "spacing": { "$ref": "#/definitions/counts" },
-        "radii": { "$ref": "#/definitions/counts" }
+        "colors": {
+          "$ref": "#/definitions/counts"
+        },
+        "fonts": {
+          "$ref": "#/definitions/counts"
+        },
+        "fontSizes": {
+          "$ref": "#/definitions/counts"
+        },
+        "spacing": {
+          "$ref": "#/definitions/counts"
+        },
+        "radii": {
+          "$ref": "#/definitions/counts"
+        }
       }
     },
-    "findings": { "type": "array", "items": { "$ref": "#/definitions/finding" } }
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/finding"
+      }
+    }
   },
   "definitions": {
-    "source": { "enum": ["stylesheet", "inline", "theme", "nativewind", "prop"] },
-    "reason": { "enum": ["RUNTIME_VALUE", "SPREAD", "UNKNOWN_IMPORT", "DYNAMIC_CLASS", "UNKNOWN_CLASS", "HOOK_UNSUPPORTED", "CONDITIONAL_UNKNOWN", "EXTERNAL_COMPONENT"] },
-    "counts": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+    "source": {
+      "enum": [
+        "stylesheet",
+        "inline",
+        "theme",
+        "nativewind",
+        "prop"
+      ]
+    },
+    "reason": {
+      "enum": [
+        "RUNTIME_VALUE",
+        "SPREAD",
+        "UNKNOWN_IMPORT",
+        "DYNAMIC_CLASS",
+        "UNKNOWN_CLASS",
+        "HOOK_UNSUPPORTED",
+        "CONDITIONAL_UNKNOWN",
+        "EXTERNAL_COMPONENT"
+      ]
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
     "loc": {
-      "type": "object", "required": ["file", "line"], "additionalProperties": false,
-      "properties": { "file": { "type": "string" }, "line": { "type": "integer", "minimum": 1 }, "col": { "type": "integer", "minimum": 0 } }
+      "type": "object",
+      "required": [
+        "file",
+        "line"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "col": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
     },
     "styleEntry": {
-      "type": "object", "required": ["value", "source"], "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "value",
+        "source"
+      ],
+      "additionalProperties": false,
       "properties": {
         "value": {},
-        "source": { "$ref": "#/definitions/source" },
-        "approx": { "type": "boolean" },
-        "expr": { "type": "string" },
-        "alt": { "type": "array" }
+        "source": {
+          "$ref": "#/definitions/source"
+        },
+        "approx": {
+          "type": "boolean"
+        },
+        "expr": {
+          "type": "string"
+        },
+        "alt": {
+          "type": "array"
+        },
+        "layers": {
+          "type": "array",
+          "description": "Override stack oldest\u2192newest (winner last). Only present with --explain.",
+          "items": {
+            "type": "object",
+            "required": [
+              "source",
+              "value"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "source": {
+                "$ref": "#/definitions/source"
+              },
+              "value": {},
+              "loc": {
+                "$ref": "#/definitions/loc"
+              },
+              "via": {
+                "type": "string"
+              }
+            }
+          }
+        }
       }
     },
     "unresolved": {
-      "type": "object", "required": ["file", "line", "prop", "expr", "reason"], "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "file",
+        "line",
+        "prop",
+        "expr",
+        "reason"
+      ],
+      "additionalProperties": false,
       "properties": {
-        "file": { "type": "string" }, "line": { "type": "integer" }, "prop": { "type": "string" },
-        "expr": { "type": "string" }, "reason": { "$ref": "#/definitions/reason" }
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer"
+        },
+        "prop": {
+          "type": "string"
+        },
+        "expr": {
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "#/definitions/reason"
+        }
       }
     },
     "node": {
-      "type": "object", "required": ["name", "loc"], "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "loc"
+      ],
+      "additionalProperties": false,
       "properties": {
-        "name": { "type": "string" },
-        "text": { "type": "string" },
-        "loc": { "$ref": "#/definitions/loc" },
-        "callsite": { "$ref": "#/definitions/loc" },
-        "style": { "type": "object", "additionalProperties": { "$ref": "#/definitions/styleEntry" } },
-        "a11y": {
-          "type": "object", "additionalProperties": false,
-          "properties": {
-            "role": { "type": "string" }, "label": { "type": "string" }, "interactive": { "type": "boolean" },
-            "hitSlop": { "type": "number" }, "allowFontScaling": { "type": "boolean" }, "maxFontSizeMultiplier": { "type": "number" }
+        "name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "loc": {
+          "$ref": "#/definitions/loc"
+        },
+        "callsite": {
+          "$ref": "#/definitions/loc"
+        },
+        "style": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/styleEntry"
           }
         },
-        "repeat": { "type": "integer", "minimum": 0, "description": "Rendered from .map()/list data; 0 = unknown count" },
-        "more": { "type": "integer", "minimum": 0, "description": "Children hidden by --depth" },
-        "children": { "type": "array", "items": { "$ref": "#/definitions/node" } }
+        "a11y": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "role": {
+              "type": "string"
+            },
+            "label": {
+              "type": "string"
+            },
+            "interactive": {
+              "type": "boolean"
+            },
+            "hitSlop": {
+              "type": "number"
+            },
+            "allowFontScaling": {
+              "type": "boolean"
+            },
+            "maxFontSizeMultiplier": {
+              "type": "number"
+            }
+          }
+        },
+        "repeat": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Rendered from .map()/list data; 0 = unknown count"
+        },
+        "more": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Children hidden by --depth"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/node"
+          }
+        }
       }
     },
     "route": {
-      "type": "object", "required": ["path", "file", "layouts", "tree", "stats", "unresolved"], "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "path",
+        "file",
+        "layouts",
+        "tree",
+        "stats",
+        "unresolved"
+      ],
+      "additionalProperties": false,
       "properties": {
-        "path": { "type": "string" },
-        "file": { "type": "string" },
-        "layouts": { "type": "array", "items": { "type": "string" } },
-        "tree": { "$ref": "#/definitions/node" },
-        "stats": {
-          "type": "object", "required": ["resolved", "total", "tokens"], "additionalProperties": false,
-          "properties": { "resolved": { "type": "integer" }, "total": { "type": "integer" }, "tokens": { "type": "integer" } }
+        "path": {
+          "type": "string"
         },
-        "unresolved": { "type": "array", "items": { "$ref": "#/definitions/unresolved" } },
-        "diff": {
-          "type": "object", "required": ["ref", "status", "removed"], "additionalProperties": false,
+        "file": {
+          "type": "string"
+        },
+        "layouts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tree": {
+          "$ref": "#/definitions/node"
+        },
+        "stats": {
+          "type": "object",
+          "required": [
+            "resolved",
+            "total",
+            "tokens"
+          ],
+          "additionalProperties": false,
           "properties": {
-            "ref": { "type": "string" },
-            "status": { "enum": ["added", "changed", "removed"] },
-            "removed": { "type": "array", "items": { "type": "string" } }
+            "resolved": {
+              "type": "integer"
+            },
+            "total": {
+              "type": "integer"
+            },
+            "tokens": {
+              "type": "integer"
+            }
+          }
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/unresolved"
+          }
+        },
+        "diff": {
+          "type": "object",
+          "required": [
+            "ref",
+            "status",
+            "removed"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "ref": {
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "added",
+                "changed",
+                "removed"
+              ]
+            },
+            "removed": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         }
       }
     },
     "finding": {
-      "type": "object", "required": ["ruleId", "severity", "message", "url"], "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "ruleId",
+        "severity",
+        "message",
+        "url"
+      ],
+      "additionalProperties": false,
       "properties": {
-        "ruleId": { "type": "string" },
-        "severity": { "enum": ["error", "warn", "info", "unknown"] },
-        "message": { "type": "string" }, "file": { "type": "string" }, "line": { "type": "integer" },
-        "node": { "type": "string" }, "route": { "type": "string" }, "url": { "type": "string" }
+        "ruleId": {
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "warn",
+            "info",
+            "unknown"
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer"
+        },
+        "node": {
+          "type": "string"
+        },
+        "route": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
       }
     }
   }
