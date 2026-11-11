@@ -13,10 +13,10 @@ jobs:
       run:
         working-directory: fixtures/themed
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - name: Audit (fails on errors; add --strict to fail on warnings)
@@ -31,7 +31,7 @@ jobs:
             if [ -s ui-diff.txt ]; then cat ui-diff.txt; else echo 'No UI changes.'; fi
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: ui-diff
