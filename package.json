@@ -89,6 +89,11 @@
     "tsup": "^8.5.1",
     "typescript": "~5.9",
     "typescript-eslint": "^8.72.1",
-    "vitest": "^3.2.7"
+    "vitest": "^4.1.12"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.7"
+    }
   }
 }
