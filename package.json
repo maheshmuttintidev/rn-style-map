@@ -79,7 +79,7 @@
     "tailwindcss": "^3.4.19"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.5",
+    "@eslint/js": "^10.0.1",
     "@types/culori": "^4.0.1",
     "@types/node": "^20.19.43",
     "ajv": "^8.20.0",
